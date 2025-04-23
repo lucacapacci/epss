@@ -21,11 +21,12 @@ jobs:
       run: |
         # Extract the gz file (which will create a folder named like the csv)
         gunzip -k epss_scores.gz
+        mv epss_scores epss_scores.csv
 
     - name: Commit and push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add data/epss_scores.csv
+        git add epss_scores.csv
         git commit -m "Update EPSS data $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
         git push
