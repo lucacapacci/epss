@@ -3,7 +3,7 @@ name: Download and Extract EPSS File
 on:
   schedule:
     - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch:       # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   download-extract-commit:
@@ -17,19 +17,17 @@ jobs:
       run: |
         curl -L -o epss_scores.gz https://epss.cyentia.com/epss_scores-current.csv.gz
 
-    - name: Extract .gz file
+    - name: Extract and rename file
       run: |
         gunzip -f epss_scores.gz
+        extracted_file=$(ls epss_scores-*.csv)
+        mkdir -p data
+        mv "$extracted_file" data/epss_scores.csv
 
     - name: Commit and push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
-        # Move the file to a known path (optional)
-        mkdir -p data
-        mv epss_scores-current.csv data/
-
-        git add data/epss_scores-current.csv
+        git add data/epss_scores.csv
         git commit -m "Update EPSS data $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
         git push
