@@ -1,0 +1,35 @@
+name: Download and Extract EPSS File
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:       # Allows manual trigger from GitHub UI
+
+jobs:
+  download-extract-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download EPSS .gz file
+      run: |
+        curl -L -o epss_scores.gz https://epss.cyentia.com/epss_scores-current.csv.gz
+
+    - name: Extract .gz file
+      run: |
+        gunzip -f epss_scores.gz
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        
+        # Move the file to a known path (optional)
+        mkdir -p data
+        mv epss_scores-current.csv data/
+
+        git add data/epss_scores-current.csv
+        git commit -m "Update EPSS data $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+        git push
