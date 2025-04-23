@@ -1,0 +1,50 @@
+name: Download and Extract EPSS File
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+
+permissions:
+  contents: write
+
+jobs:
+  download-process-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download EPSS .gz file
+      run: |
+        curl -L -o epss_scores.gz https://epss.cyentia.com/epss_scores-current.csv.gz
+
+    - name: Extract and rename CSV file
+      run: |
+        gunzip -k epss_scores.gz
+        mv epss_scores epss_scores.csv
+
+    - name: Split CSV by CVE year and group
+      run: |
+        mkdir -p data_groups
+        tail -n +2 epss_scores.csv | while IFS=$'\t' read -r cve epss percentile; do
+          year=$(echo "$cve" | cut -d '-' -f 2)
+          num=$(echo "$cve" | cut -d '-' -f 3)
+          group=${num:0:1}
+          echo -e "$cve\t$epss\t$percentile" >> "data_groups/epss_scores_${year}_${group}.csv"
+        done
+
+        # Add headers to all output files
+        for f in data_groups/epss_scores_*.csv; do
+          (echo -e "cve\tepss\tpercentile"; cat "$f") > "${f}.tmp" && mv "${f}.tmp" "$f"
+        done
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add data_groups/
+        git commit -m "Split EPSS data by CVE year and group on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+        git push
