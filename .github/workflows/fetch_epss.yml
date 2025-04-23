@@ -17,12 +17,10 @@ jobs:
       run: |
         curl -L -o epss_scores.gz https://epss.cyentia.com/epss_scores-current.csv.gz
 
-    - name: Extract and rename file
+    - name: Extract and rename CSV file
       run: |
-        gunzip -f epss_scores.gz
-        extracted_file=$(ls epss_scores-*.csv)
-        mkdir -p data
-        mv "$extracted_file" data/epss_scores.csv
+        # Extract the gz file (which will create a folder named like the csv)
+        gunzip -k epss_scores.gz
 
     - name: Commit and push changes
       run: |
