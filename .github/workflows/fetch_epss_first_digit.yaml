@@ -2,7 +2,7 @@ name: Download and Extract EPSS File - Split year and group
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 1,9,17 * * *'  # Every 8 hours
   workflow_dispatch:
 
 
