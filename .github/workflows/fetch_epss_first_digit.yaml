@@ -30,17 +30,25 @@ jobs:
       run: |
         rm -rf data_groups
         mkdir -p data_groups
-        tail -n +2 epss_scores.csv | while IFS=$'\t' read -r cve epss percentile; do
-          year=$(echo "$cve" | cut -d '-' -f 2)
-          num=$(echo "$cve" | cut -d '-' -f 3)
-          group=${num:0:1}
-          echo -e "$cve\t$epss\t$percentile" >> "data_groups/epss_scores_${year}_${group}.csv"
-        done
 
-        # Add headers to all output files
-        for f in data_groups/epss_scores_*.csv; do
-          (echo -e "cve,epss,percentile"; cat "$f") > "${f}.tmp" && mv "${f}.tmp" "$f"
-        done
+        header=$(head -n1 epss_scores.csv)
+
+        tail -n +2 epss_scores.csv | awk -v header="$header" -F, '
+          BEGIN { OFS="," }
+          {
+            if (match($1, /CVE-([0-9]{4})-([0-9]+)/, arr)) {
+              year = arr[1]
+              num = arr[2]
+              group = substr(num, 1, 1)
+              filename = "data_groups/epss_scores" year "_" group ".csv"
+              if (!(filename in written)) {
+                print header > filename
+                written[filename] = 1
+              }
+              print >> filename
+            }
+          }
+        '
 
     - name: Commit and push changes
       run: |
