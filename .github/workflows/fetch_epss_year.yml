@@ -29,7 +29,8 @@ jobs:
     - name: Split CSV by CVE year
       run: |
         rm -rf data
-        mkdir -p data
+        rm -rf data_years
+        mkdir -p data_years
 
         header=$(head -n1 epss_scores.csv)
 
@@ -40,7 +41,7 @@ jobs:
             match($1, /CVE-([0-9]{4})-/, arr)
             year = arr[1]
             if (year != "") {
-              file = "data/epss_scores_" year ".csv"
+              file = "data_years/epss_scores_" year ".csv"
               if (!(year in seen)) {
                 print header > file
                 seen[year] = 1
@@ -54,6 +55,6 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add data/
+        git add data_years/
         git commit -m "Split EPSS data by CVE year on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
         git push
