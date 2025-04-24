@@ -40,7 +40,7 @@ jobs:
               year = arr[1]
               num = arr[2]
               group = substr(num, 1, 1)
-              filename = "data_groups/epss_scores" year "_" group ".csv"
+              filename = "data_groups/epss_scores_" year "_" group ".csv"
               if (!(filename in written)) {
                 print header > filename
                 written[filename] = 1
