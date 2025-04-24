@@ -56,5 +56,6 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add data_years/
+        git add data/
         git commit -m "Split EPSS data by CVE year on $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
         git push
