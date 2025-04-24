@@ -28,6 +28,7 @@ jobs:
 
     - name: Split CSV by CVE year and group
       run: |
+        rm -rf data_groups
         mkdir -p data_groups
         tail -n +2 epss_scores.csv | while IFS=$'\t' read -r cve epss percentile; do
           year=$(echo "$cve" | cut -d '-' -f 2)
@@ -38,7 +39,7 @@ jobs:
 
         # Add headers to all output files
         for f in data_groups/epss_scores_*.csv; do
-          (echo -e "cve\tepss\tpercentile"; cat "$f") > "${f}.tmp" && mv "${f}.tmp" "$f"
+          (echo -e "cve,epss,percentile"; cat "$f") > "${f}.tmp" && mv "${f}.tmp" "$f"
         done
 
     - name: Commit and push changes
