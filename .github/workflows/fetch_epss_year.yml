@@ -30,15 +30,25 @@ jobs:
       run: |
         rm -rf data
         mkdir -p data
-        tail -n +2 epss_scores.csv | while IFS=$'\t' read -r cve epss percentile; do
-          year=$(echo "$cve" | cut -d '-' -f 2)
-          echo -e "$cve\t$epss\t$percentile" >> "data/epss_scores_${year}.csv"
-        done
 
-        # Add headers to all output files
-        for f in data/epss_scores_*.csv; do
-          (echo -e "cve,epss,percentile"; cat "$f") > "${f}.tmp" && mv "${f}.tmp" "$f"
-        done
+        header=$(head -n1 epss_scores.csv)
+
+        # Use awk to extract lines by year
+        tail -n +2 epss_scores.csv | awk -v header="$header" -F, '
+          BEGIN { OFS="," }
+          {
+            match($1, /CVE-([0-9]{4})-/, arr)
+            year = arr[1]
+            if (year != "") {
+              file = "data/epss_scores_" year ".csv"
+              if (!(year in seen)) {
+                print header > file
+                seen[year] = 1
+              }
+              print >> file
+            }
+          }
+        '
 
     - name: Commit and push changes
       run: |
