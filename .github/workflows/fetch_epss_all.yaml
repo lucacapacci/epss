@@ -1,1 +1,85 @@
+name: Download and Extract EPSS File
 
+on:
+  schedule:
+    - cron: '0 2,10,18 * * *'  # Every 8 hours
+  workflow_dispatch:
+
+
+permissions:
+  contents: write
+
+jobs:
+  download-extract-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download EPSS .gz file
+      run: |
+        curl -L -o epss_scores.gz https://epss.cyentia.com/epss_scores-current.csv.gz
+
+    - name: Extract and rename CSV file
+      run: |
+        # Extract the gz file (which will create a folder named like the csv)
+        gunzip -k epss_scores.gz
+        mv epss_scores epss_scores.csv
+
+    - name: Split CSV by CVE year
+      run: |
+        rm -rf data_years
+        mkdir -p data_years
+
+        header=$(head -n1 epss_scores.csv)
+
+        # Use awk to extract lines by year
+        tail -n +2 epss_scores.csv | awk -v header="$header" -F, '
+          BEGIN { OFS="," }
+          {
+            match($1, /CVE-([0-9]{4})-/, arr)
+            year = arr[1]
+            if (year != "") {
+              file = "data_years/epss_scores_" year ".csv"
+              if (!(year in seen)) {
+                print header > file
+                seen[year] = 1
+              }
+              print >> file
+            }
+          }
+        '
+    - name: Split CSV by CVE year and group
+      run: |
+        rm -rf data_groups
+        mkdir -p data_groups
+
+        header=$(head -n1 epss_scores.csv)
+
+        tail -n +2 epss_scores.csv | awk -v header="$header" -F, '
+          BEGIN { OFS="," }
+          {
+            if (match($1, /CVE-([0-9]{4})-([0-9]+)/, arr)) {
+              year = arr[1]
+              num = arr[2]
+              group = substr(num, 1, 1)
+              filename = "data_groups/epss_scores_" year "_" group ".csv"
+              if (!(filename in written)) {
+                print header > filename
+                written[filename] = 1
+              }
+              print >> filename
+            }
+          }
+        '
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add epss_scores.csv
+        git add data_years/
+        git add data_groups/
+        git commit -m "Update EPSS data $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+        git push
