@@ -50,6 +50,7 @@ jobs:
             }
           }
         '
+      
     - name: Split CSV by CVE year and group
       run: |
         rm -rf data_groups
