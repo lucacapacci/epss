@@ -1,4 +1,4 @@
-name: Download and Extract EPSS File
+name: Download and Extract EPSS File - All
 
 on:
   schedule:
