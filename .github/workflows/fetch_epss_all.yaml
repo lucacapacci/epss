@@ -82,16 +82,23 @@ jobs:
 
         header=$(head -n1 epss_scores.csv)
 
-        tail -n +2 epss_scores.csv | while IFS=, read -r line; do
-          cve=$(echo "$line" | cut -d, -f1)
-          if [[ "$cve" =~ CVE-([0-9]{4})-[0-9]+ ]]; then
-            year="${BASH_REMATCH[1]}"
-            dir="data_single/$year"
-            mkdir -p "$dir"
-            echo "$header" > "$dir/$cve.csv"
-            echo "$line" >> "$dir/$cve.csv"
-          fi
-        done
+        tail -n +2 epss_scores.csv | awk -v header="$header" -F, '
+          {
+            cve = $1
+            if (match(cve, /CVE-([0-9]{4})-[0-9]+/, arr)) {
+              year = arr[1]
+              dir = "data_single/" year
+              file = dir "/" cve ".csv"
+              if (!(file in seen)) {
+                cmd = "mkdir -p \"" dir "\""
+                system(cmd)
+                print header > file
+                seen[file] = 1
+              }
+              print >> file
+            }
+          }
+        '
 
     - name: Commit and push changes
       run: |
