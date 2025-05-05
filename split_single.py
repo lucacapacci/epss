@@ -3,7 +3,8 @@ import os
 
 with open('epss_scores.csv', newline='') as csvfile:
     reader = csv.reader(csvfile)
-    header = next(reader)  # ['cve', 'epss', 'percentile']
+    header1 = next(reader)
+    header2 = next(reader)
 
     for row in reader:
         cve = row[0]
@@ -16,7 +17,8 @@ with open('epss_scores.csv', newline='') as csvfile:
 
                 with open(path, "w", newline='') as f:
                     writer = csv.writer(f)
-                    writer.writerow(header)
+                    writer.writerow(header1)
+                    writer.writerow(header2)
                     writer.writerow(row)
 
             except Exception as e:
