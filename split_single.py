@@ -3,7 +3,7 @@ import os
 
 with open('epss_scores.csv', newline='') as csvfile:
     reader = csv.reader(csvfile)
-    header = next(reader)
+    header = next(reader)  # ['cve', 'epss', 'percentile']
 
     for row in reader:
         cve = row[0]
@@ -14,12 +14,9 @@ with open('epss_scores.csv', newline='') as csvfile:
                 os.makedirs(directory, exist_ok=True)
                 path = os.path.join(directory, f"{cve}.csv")
 
-                # Open file, write header + row, close it immediately
-                write_header = not os.path.exists(path)
                 with open(path, "w", newline='') as f:
                     writer = csv.writer(f)
-                    if write_header:
-                        writer.writerow(header)
+                    writer.writerow(header)
                     writer.writerow(row)
 
             except Exception as e:
