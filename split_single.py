@@ -1,13 +1,9 @@
 import csv
 import os
-from collections import defaultdict
 
 with open('epss_scores.csv', newline='') as csvfile:
     reader = csv.reader(csvfile)
     header = next(reader)
-    
-    writers = {}
-    files = {}
 
     for row in reader:
         cve = row[0]
@@ -17,17 +13,14 @@ with open('epss_scores.csv', newline='') as csvfile:
                 directory = os.path.join("data_single", year)
                 os.makedirs(directory, exist_ok=True)
                 path = os.path.join(directory, f"{cve}.csv")
-                
-                if path not in writers:
-                    f = open(path, "w", newline='')
+
+                # Open file, write header + row, close it immediately
+                write_header = not os.path.exists(path)
+                with open(path, "w", newline='') as f:
                     writer = csv.writer(f)
-                    writer.writerow(header)
-                    writers[path] = writer
-                    files[path] = f
-                
-                writers[path].writerow(row)
+                    if write_header:
+                        writer.writerow(header)
+                    writer.writerow(row)
+
             except Exception as e:
                 print(f"Skipping {cve}: {e}")
-
-    for f in files.values():
-        f.close()
