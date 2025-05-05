@@ -76,11 +76,10 @@ jobs:
         '
         
     - name: Split CSV into individual CVE files by year
-  run: |
-    rm -rf data_single
-    mkdir -p data_single
-    python ./split_single.py
-
+      run: |
+        rm -rf data_single
+        mkdir -p data_single
+        python ./split_single.py
 
     - name: Commit and push changes
       run: |
