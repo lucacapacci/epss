@@ -9,19 +9,18 @@ Data is refreshed every **2 hours** and organized in multiple formats for easier
 CVE data is available in the following formats:
 
 1. **All CVEs in a single file**  
-   Get all CVEs &rarr; https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/epss_scores.csv
+   Get all CVEs &rarr; https://lucacapacci.github.io/epss/epss_scores.csv
    
 
 3. **Files grouped by year**  
-   Example: get all CVEs starting with "CVE-2025-" &rarr;
-https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_years/epss_scores_2025.csv
+   Example: get all CVEs starting with "CVE-2025-" &rarr; https://lucacapacci.github.io/epss/data_years/epss_scores_2025.csv
 
 4. **Files grouped by year and first digit of the CVE ID**  
-   Example: get all CVEs starting with "CVE-2025-0" &rarr; https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_groups/epss_scores_2025_0.csv
+   Example: get all CVEs starting with "CVE-2025-0" &rarr; https://lucacapacci.github.io/epss/data_groups/epss_scores_2025_0.csv
 
 5. **Single file per CVE**  
    Example: get CVE-2025-0108 &rarr;
-   https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_single/2025/CVE-2025-0001.csv
+   https://lucacapacci.github.io/epss/data_single/2025/CVE-2025-0001.csv
 
 ---
 
@@ -30,7 +29,7 @@ https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_years/ep
 ### Using `curl`
 
 ```bash
-curl -L https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_single/2025/CVE-2025-0001.csv
+curl -L https://lucacapacci.github.io/epss/data_single/2025/CVE-2025-0001.csv
 ```
 
 ### Using Python
@@ -40,7 +39,7 @@ import requests
 import csv
 from io import StringIO
 
-url = 'https://raw.githubusercontent.com/lucacapacci/epss/refs/heads/main/data_single/2025/CVE-2025-0001.csv'
+url = 'https://lucacapacci.github.io/epss/data_single/2025/CVE-2025-0001.csv'
 response = requests.get(url)
 csv_file = StringIO(response.text)
 reader = csv.reader(csv_file)
